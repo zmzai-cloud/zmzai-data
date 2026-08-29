@@ -58,7 +58,12 @@ jobs:
 
       - name: Pack artifact
         run: |
-          FILES=".next package.json pnpm-lock.yaml pnpm-workspace.yaml"
+          # pnpm-workspace.yaml 不是每个仓库都有（relay 有、arena/data 没有），
+          # 走 [ -e ] 判断避免 tar: Cannot stat 导致打包失败
+          FILES=".next package.json pnpm-lock.yaml"
+          for p in pnpm-workspace.yaml .npmrc; do
+            [ -e "$p" ] && FILES="$FILES $p"
+          done
           for p in next.config.ts next.config.mjs next.config.js public messages content scripts middleware.ts src; do
             [ -e "$p" ] && FILES="$FILES $p"
           done
